@@ -43,6 +43,7 @@ function createBox(task) {
     // Appends remove button onto each box
     let rmButton = document.createElement('button');
     rmButton.classList.add('remove');
+
     //rmButton.onClick = removeTask();
     rmButton.innerHTML = 'X';
 
@@ -52,6 +53,8 @@ function createBox(task) {
     // Appends all children to taskBox div element
     const box = document.getElementById('taskBox');
     box.appendChild(el);
+
+    console.log()
 }
 
 // Remove Task
