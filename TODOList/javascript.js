@@ -5,16 +5,37 @@ TODO:
 - Allow the ability to move the boxes to change prioritization !DONE!
 - Do not allow submission if textbox is empty !DONE!
 - Allow the ability to delete a task
+
+BUGS:
+- After clicking anywhere after clicking 'submit tasks', the dragged element 
+    will take over both drag source and drag destination rather than switching
+    information.
+- Clicking anywhere on screen created a buildup of propagation
+- Dragging the boxes takes away the functionality of remove button
 */
 
 const taskList = [];
+let idfk = false;
 
 function addTask() {
+
+    
+    if (idfk) {
+        document.getElementById('submitButton').removeEventListener('click', handleDragEnd(e));
+        document.getElementById('submitButton').removeEventListener('click', handleDragEnter(e));
+        document.getElementById('submitButton').removeEventListener('click', handleDragLeave(e));
+        document.getElementById('submitButton').removeEventListener('click', handleDragOver(e));
+        document.getElementById('submitButton').removeEventListener('click', handleDragStart(e));
+        document.getElementById('submitButton').removeEventListener('click', handleDrop(e));
+    }
+    idfk = true;
+
     //Gathers input from text box
+
     let taskSubmission = document.getElementById('tasksWritten').value;
 
     if (taskSubmission.trim() == '') {
-        console.log('Empty String');
+        alert('Empty String');
         return;
     }
 
@@ -33,19 +54,25 @@ function addTask() {
 }
 
 // For each task submission, this runs to create a new box with the task loaded in
+let i = 1;
 function createBox(task) {
     // Creates individual box and appends all necessary attributes
     let el = document.createElement('div');
     el.draggable = true;
     el.classList.add('box');
     el.innerHTML = task;
+    el.id = "element";
     
     // Appends remove button onto each box
     let rmButton = document.createElement('button');
     rmButton.classList.add('remove');
+    rmButton.id = ("rmButton");
 
-    //rmButton.onClick = removeTask();
-    rmButton.innerHTML = 'X';
+    rmButton.onclick = removeTask.bind(this, el.innerHTML);
+    
+    rmButton.innerHTML = i;
+    i++
+    //rmButton.innerHTML = 'X';
 
     el.appendChild(rmButton);
 
@@ -54,67 +81,71 @@ function createBox(task) {
     const box = document.getElementById('taskBox');
     box.appendChild(el);
 
-    console.log()
 }
 
 // Remove Task
-function removeTask() {
-    console.log("Removed");
+function removeTask(task) {
+    console.log("Removed: " + task);
 }
 
 // Drag and drop event listening
 // Begins listening upon click
-document.addEventListener('click', (event) => {
-    function handleDragStart(e) {
-    this.style.opacity = '0.4';
+window.onload=function() {
+    document.getElementById('submitButton').addEventListener('click', (event) => {
+        event.stopPropagation();
 
-    dragSrcEl = this;
+        function handleDragStart(e) {
+        this.style.opacity = '0.4';
 
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
-    console.log(dragSrcEl.innerHTML);
-    console.log(dragSrcEl.classList);
-}
+        dragSrcEl = this;
 
-    function handleDragEnd (e) {
-        this.style.opacity = '1';
-
-        items.forEach(function (item) {
-            item.classList.remove('over');
-    });
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+        console.log(document.getElementById("rmButton"));
+        //console.log(dragSrcEl.innerHTML);
+        //console.log(dragSrcEl.classList);
     }
 
-    function handleDragOver(e) {
-        e.preventDefault();
-        return false;
-    }
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
 
-    function handleDragEnter(e) {
-        this.classList.add('over');
-    }
-
-    function handleDragLeave(e) {
-        this.classList.remove('over');
-    }
-
-    function handleDrop(e) {
-        e.stopPropagation(); //stops the browser from redirecting
-
-        if (dragSrcEl !== this) {
-            dragSrcEl.innerHTML = this.innerHTML;
-            this.innerHTML = e.dataTransfer.getData('text/html');
+            items.forEach(function (item) {
+                item.classList.remove('over');
+        });
         }
 
-        return false;
-    }
+        function handleDragOver(e) {
+            e.preventDefault();
+            return false;
+        }
 
-    let items = document.querySelectorAll('.box');
-    items.forEach(function(item) {
-        item.addEventListener('dragstart', handleDragStart);
-        item.addEventListener('dragover', handleDragOver);
-        item.addEventListener('dragenter', handleDragEnter);
-        item.addEventListener('dragleave', handleDragLeave);
-        item.addEventListener('dragend', handleDragEnd);
-        item.addEventListener('drop', handleDrop);
+        function handleDragEnter(e) {
+            this.classList.add('over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation(); //stops the browser from redirecting
+
+            if (dragSrcEl !== this) {
+                dragSrcEl.innerHTML = this.innerHTML;
+                this.innerHTML = e.dataTransfer.getData('text/html');
+            }
+
+            return false;
+        }
+
+        let items = document.querySelectorAll('.box');
+        items.forEach(function(item) {
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragover', handleDragOver);
+            item.addEventListener('dragenter', handleDragEnter);
+            item.addEventListener('dragleave', handleDragLeave);
+            item.addEventListener('dragend', handleDragEnd);
+            item.addEventListener('drop', handleDrop);
+        });
     });
-});
+}
